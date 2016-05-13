@@ -4,6 +4,10 @@ import me.quasindro.modreqlite.Ticket;
 
 public class MySQL extends AData {
 
+    public MySQL() {
+        // TODO hook Hikari
+    }
+
     @Override
     public int getLatestId() {
         return 0;

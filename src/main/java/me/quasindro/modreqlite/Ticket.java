@@ -12,7 +12,7 @@ public class Ticket {
     private LocalDateTime timestamp;
 
     public Ticket(int id, UUID playerUuid, String playerName, String body, LocalDateTime timestamp) {
-        this.id = id; // SAM POWINIEN SIE DOWIEDZIEC JAKIE JEST OSTATNIE ID
+        this.id = id; // TODO every data handler should know by itself what's the latest id so that I don't have to
         this.playerUuid = playerUuid;
         this.playerName = playerName;
         this.body = body;

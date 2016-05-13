@@ -4,7 +4,7 @@ import me.quasindro.modreqlite.ModReqLite;
 import me.quasindro.modreqlite.Ticket;
 import org.bukkit.entity.Player;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class ModReqCommand extends AbstractCommand {
 
@@ -22,7 +22,7 @@ public class ModReqCommand extends AbstractCommand {
         }
         String body = sb.substring(0, sb.length() - 1);
         int latest = plugin.getData().getLatestId();
-        Ticket ticket = new Ticket(latest + 1, p.getUniqueId(), p.getName(), body, new Timestamp(System.currentTimeMillis()));
+        Ticket ticket = new Ticket(latest + 1, p.getUniqueId(), p.getName(), body, LocalDateTime.now().withNano(0));
 
         plugin.getData().addTicket(ticket);
     }
