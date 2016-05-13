@@ -1,0 +1,7 @@
+main: me.quasindro.modreqlite.ModReqLite
+version: 0.0.0.0.0.0.0.0.0-pls
+name: ModReqLite
+
+commands:
+  modreq:
+    usage: /modreq

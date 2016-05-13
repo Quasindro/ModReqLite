@@ -1,0 +1,10 @@
+# Use 'yml' or 'mysql'.
+storage-method: mysql
+
+# This applies only if you have chosen mysql
+# in the previous section.
+database:
+  address: localhost:3306
+  schema: database
+  username: username
+  password: password
