@@ -11,7 +11,7 @@ public class ModReqLite extends JavaPlugin {
 
     private CommandManager cManager;
     private AData data;
-
+    //placeholder for an update
     @Override
     public void onEnable() {
         saveDefaultConfig();
