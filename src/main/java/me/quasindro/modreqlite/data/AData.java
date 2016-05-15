@@ -2,15 +2,21 @@ package me.quasindro.modreqlite.data;
 
 import me.quasindro.modreqlite.Ticket;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 public abstract class AData {
 
-    // TODO it shouldn't be like that but at this point I have no idea what to do with it,
-    // I guess I will just roll with whatever comes to my mind later
-    public abstract int getLatestId();
+    public abstract void createTicket(UUID playerUuid, String playerName, String body, LocalDateTime timestamp);
 
-    public abstract Ticket getTicket(int ticketId);
+    public abstract Ticket fetchTicket(int ticketId);
 
-    public abstract void addTicket(Ticket ticket);
+    public abstract Ticket[] fetchTickets(UUID playerUuid);
 
-    public abstract void removeTicket(int ticketId);
+    public abstract Ticket[] fetchTickets(LocalDate date);
+
+    public abstract void close();
+
+    protected abstract boolean setup();
 }

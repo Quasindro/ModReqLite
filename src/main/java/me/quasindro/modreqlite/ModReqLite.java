@@ -17,7 +17,7 @@ public class ModReqLite extends JavaPlugin {
         saveDefaultConfig();
         switch (getConfig().getString("storage-method").toLowerCase()) {
             case "yml": data = new YML(this); break;
-            case "mysql": data = new MySQL(); break;
+            case "mysql": data = new MySQL(this); break;
             case "mongodb": data = new MongoDB(); break;
             default: {
                 data = null;
@@ -28,8 +28,17 @@ public class ModReqLite extends JavaPlugin {
         cManager = new CommandManager(this);
     }
 
+    @Override
+    public void onDisable() {
+        data.close();
+    }
+
     public AData getData() {
         return data;
+    }
+
+    public void setData(AData data) {
+        this.data = data;
     }
 
     public CommandManager getCommandManager() {
