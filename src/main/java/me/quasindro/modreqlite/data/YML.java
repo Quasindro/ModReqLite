@@ -11,11 +11,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class YML extends AData {
+public class YML extends Data {
 
     private ModReqLite plugin;
-    private FileConfiguration config;
-    private File file;
+    private YamlFile yamlConfig;
+    //private YamlFile yamlTemp;
 
     public YML(ModReqLite plugin) {
         this.plugin = plugin;
@@ -23,37 +23,41 @@ public class YML extends AData {
             plugin.getLogger().severe("There was a problem while enabling the last-resort storage method, YML. Disabling the plugin.");
             plugin.getPluginLoader().disablePlugin(plugin);
         }
+        //redoIds();
     }
 
     @Override
     public void close() {
-        // do nothing
+        //yamlTemp.getFile().delete();
     }
 
     @Override
-    public void createTicket(UUID playerUuid, String playerName, String body, LocalDateTime timestamp) {
-        timestamp = timestamp.withNano(0);
-        String id = config.getKeys(false).size() + 1 + "";
-        config.createSection(id);
-        config.set(id + ".UUID", playerUuid.toString());
-        config.set(id + ".name", playerName);
-        config.set(id + ".body", body);
-        config.set(id + ".timestamp", timestamp.toString());
+    public void createTicket(UUID playerUuid, String playerName, String body, LocalDateTime date) {
+        date = date.withNano(0);
+        String id = yamlConfig.getConfig().getKeys(false).size() + 1 + "";
+        //if (yamlConfig.getConfig().isConfigurationSection(id)) {
+        //    redoIds();
+        //}
+        yamlConfig.getConfig().createSection(id);
+        yamlConfig.getConfig().set(id + ".UUID", playerUuid.toString());
+        yamlConfig.getConfig().set(id + ".name", playerName);
+        yamlConfig.getConfig().set(id + ".body", body);
+        yamlConfig.getConfig().set(id + ".date", date.toString());
         try {
-            config.save(file);
-        } catch (IOException ex) {
-            ex.printStackTrace(); // im lazy
+            yamlConfig.getConfig().save(yamlConfig.getFile());
+        } catch (IOException e) {
+            e.printStackTrace(); // im lazy
         }
     }
 
     @Override
     public Ticket fetchTicket(int ticketId) {
-        for (String section : config.getKeys(false)) {
+        for (String section : yamlConfig.getConfig().getKeys(false)) {
             int id;
 
             try {
                 id = Integer.parseInt(section);
-            } catch (NumberFormatException ex) {
+            } catch (NumberFormatException e) {
                 plugin.getLogger().warning(section + " is not an ID, skipping. Perhaps it could be worth looking into ModReqLite/data.yml file before the claims' IDs are redone automatically.");
                 continue;
             }
@@ -78,52 +82,95 @@ public class YML extends AData {
 
     @Override
     protected boolean setup() {
+        yamlConfig = setupFile("data.yml");
+        return yamlConfig != null;
+    }
+
+    private YamlFile setupFile(String fileName) {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdir();
         }
 
-        file = new File(plugin.getDataFolder(), "data.yml");
+        File file = new File(plugin.getDataFolder(), fileName);
 
         if (!file.exists()) {
             try {
                 file.createNewFile();
-            } catch (IOException ex) {
-                plugin.getLogger().severe("There was a problem creating the data file!");
-                ex.printStackTrace();
-                return false;
+            } catch (IOException e) {
+                plugin.getLogger().severe("There was a problem creating a " + fileName + " file!");
+                e.printStackTrace();
+                return null;
             }
         }
 
-        config = YamlConfiguration.loadConfiguration(file);
-
-        // TODO SCAN FOR ANY INCONSISTENCIES (1,2,6,9,12 ETC)
-        // AND MAYBE LOAD THE LATEST ONES TO SOME KIND OF COLLECTION
-        return true;
+        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+        return new YamlFile(file, config);
     }
 
-    private void redoIds() {
+    /*private void redoIds() {
         int before = 0;
         int cache = 1;
-        for (String section : config.getKeys(false)) {
+        yamlTemp = setupFile("temp.yml");
+        for (String section : yamlConfig.getConfig().getKeys(false)) {
             try {
                 cache = Integer.parseInt(section);
-            } catch (NumberFormatException ex) {
-                if (!config.isConfigurationSection(cache + "")) {
-                    config.createSection(cache + "");
-                    config.set(cache + ".UUID", config.get(section + ".UUID"));
-                    config.set(cache + ".name", config.get(section + ".name"));
-                    config.set(cache + ".body", config.get(section + ".body"));
-                    config.set(cache + ".timestamp", config.get(section + ".timestamp"));
-                    config.set(section, null);
+            } catch (NumberFormatException e) {
+                if (!yamlConfig.getConfig().isConfigurationSection(cache + "")) {
+                    yamlConfig.getConfig().createSection(cache + "");
+                    yamlConfig.getConfig().set(cache + ".UUID", yamlConfig.getConfig().get(section + ".UUID"));
+                    yamlConfig.getConfig().set(cache + ".name", yamlConfig.getConfig().get(section + ".name"));
+                    yamlConfig.getConfig().set(cache + ".body", yamlConfig.getConfig().get(section + ".body"));
+                    yamlConfig.getConfig().set(cache + ".timestamp", yamlConfig.getConfig().get(section + ".timestamp"));
+                    yamlConfig.getConfig().set(section, null);
+                    try {
+                        yamlConfig.getConfig().save(yamlConfig.getFile());
+                    } catch (IOException io) {
+                        io.printStackTrace();
+                    }
+                    System.out.println("isnt a configurationsection");
                 } else {
-                    // probably take a random number between getKeys.size() and getKeys.size()*2 and check if it's not a ConfigurationSection -- then use it as temporary section to move data
+                    // utilize the tempfile
+                    yamlTemp.getConfig().createSection(cache + "");
+                    yamlTemp.getConfig().set(cache + ".UUID", yamlConfig.getConfig().get(section + ".UUID"));
+                    yamlTemp.getConfig().set(cache + ".name", yamlConfig.getConfig().get(section + ".name"));
+                    yamlTemp.getConfig().set(cache + ".body", yamlConfig.getConfig().get(section + ".body"));
+                    yamlTemp.getConfig().set(cache + ".timestamp", yamlConfig.getConfig().get(section + ".timestamp"));
+                    yamlConfig.getConfig().set(section, null);
+                    try {
+                        yamlConfig.getConfig().save(yamlConfig.getFile());
+                        yamlTemp.getConfig().save(yamlTemp.getFile());
+                    } catch (IOException io) {
+                        io.printStackTrace();
+                    }
+                    System.out.println("is a configurationsection");
                 }
             }
+            if (cache == before + 1) {
 
-            if (before + 1 == cache) {
-                // all is good i think, nothing was caught an we can continue
+            } else {
+
             }
         }
         plugin.getLogger().info("Claim IDs redone.");
+    }*/
+
+    private class YamlFile {
+
+        private File file;
+        private FileConfiguration config;
+
+        private YamlFile(File file, FileConfiguration config) {
+            this.file = file;
+            this.config = config;
+        }
+
+        private File getFile() {
+            return file;
+        }
+
+        private FileConfiguration getConfig() {
+            return config;
+        }
     }
+
 }

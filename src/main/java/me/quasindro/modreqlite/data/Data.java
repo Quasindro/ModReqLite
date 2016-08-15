@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public abstract class AData {
+public abstract class Data {
 
     public abstract void createTicket(UUID playerUuid, String playerName, String body, LocalDateTime timestamp);
 

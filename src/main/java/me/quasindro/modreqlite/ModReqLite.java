@@ -1,24 +1,39 @@
 package me.quasindro.modreqlite;
 
 import me.quasindro.modreqlite.commands.CommandManager;
-import me.quasindro.modreqlite.data.AData;
+import me.quasindro.modreqlite.constants.Settings;
+import me.quasindro.modreqlite.data.Data;
 import me.quasindro.modreqlite.data.MongoDB;
 import me.quasindro.modreqlite.data.MySQL;
 import me.quasindro.modreqlite.data.YML;
+import me.quasindro.modreqlite.listeners.InventoryClickListener;
+import me.quasindro.modreqlite.menu.MenuManager;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ModReqLite extends JavaPlugin {
 
     private CommandManager cManager;
-    private AData data;
+    private MenuManager menuManager;
+    private Data data;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        switch (getConfig().getString("storage-method").toLowerCase()) {
-            case "yml": data = new YML(this); break;
-            case "mysql": data = new MySQL(this); break;
-            case "mongodb": data = new MongoDB(); break;
+        switch (Settings.STORAGE_METHOD.toUpperCase()) {
+            case "YML": {
+                data = new YML(this);
+                break;
+            }
+            case "MYSQL": {
+                data = new MySQL(this);
+                break;
+            }
+            case "NOSQL": {
+                data = new MongoDB();
+                break;
+            }
             default: {
                 data = null;
                 getLogger().severe("Unknown storage method in ModReqLite/config.yml! Disabling the plugin.");
@@ -26,6 +41,8 @@ public class ModReqLite extends JavaPlugin {
             }
         }
         cManager = new CommandManager(this);
+        menuManager = new MenuManager(this);
+        Bukkit.getPluginManager().registerEvents(new InventoryClickListener(menuManager), this);
     }
 
     @Override
@@ -33,15 +50,23 @@ public class ModReqLite extends JavaPlugin {
         data.close();
     }
 
-    public AData getData() {
+    public static Plugin getPlugin() {
+        return Bukkit.getPluginManager().getPlugin("ModReqLite");
+    }
+
+    public Data getData() {
         return data;
     }
 
-    public void setData(AData data) {
+    public void setData(Data data) {
         this.data = data;
     }
 
     public CommandManager getCommandManager() {
         return cManager;
+    }
+
+    public MenuManager getMenuManager() {
+        return menuManager;
     }
 }

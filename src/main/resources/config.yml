@@ -1,4 +1,4 @@
-# Use 'yml' or 'mysql'.
+# Use 'yml', 'mysql' or 'nosql'.
 storage-method: mysql
 
 # This applies only if you have chosen mysql

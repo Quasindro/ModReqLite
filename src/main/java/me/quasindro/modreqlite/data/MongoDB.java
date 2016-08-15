@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class MongoDB extends AData {
+public class MongoDB extends Data {
 
     private ModReqLite plugin;
     private MongoCollection tickets;
@@ -52,7 +52,7 @@ public class MongoDB extends AData {
         String address = plugin.getConfig().getString("database.address");
         try {
             client = new MongoClient(address.split(":")[0], Integer.parseInt(address.split(":")[1]));
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException e) {
             plugin.getLogger().severe("Incorrect address of the database!");
             return false;
         }
